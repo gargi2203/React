@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import{useTodo} from '../contexts/todoContext'
 
 function TodoItem({ todo }) {
     const [isTodoEditable, setIsTodoEditable] = useState(false)
     const [todoMsg, setTodoMsg] = useState(todo.todo)
-    const {updateTodo, deleteTodo, toggleComplete} = useTodo()
+    const {updateTodo, deleteTodo, toggleComplete} = useTodo();
+    const textareaRef = useRef(null);
 
     const editTodo = () => {
         updateTodo(todo.id, { ...todo, todo: todoMsg})
@@ -12,7 +13,15 @@ function TodoItem({ todo }) {
     }
     const toggleCompleted  = () => {
         toggleComplete(todo.id)
-    }
+    };
+
+    useEffect(() => {
+        const textarea = textareaRef.current;
+        if (textarea) {
+            textarea.style.height = 'auto'; // Reset height
+            textarea.style.height = `${textarea.scrollHeight}px`; // Set height based on content
+        }
+    }, [todoMsg, isTodoEditable]);
 
 
     return (
@@ -27,18 +36,23 @@ function TodoItem({ todo }) {
                 checked={todo.completed}
                 onChange={toggleCompleted}
             />
-            <input
-                type="text"
+            <textarea
+                ref={textareaRef}
                 className={`border outline-none w-full bg-transparent rounded-lg ${
                     isTodoEditable ? "border-black/10 px-2" : "border-transparent"
                 } ${todo.completed ? "line-through" : ""}`}
                 value={todoMsg}
                 onChange={(e) => setTodoMsg(e.target.value)}
                 readOnly={!isTodoEditable}
+                rows={1}
+                style={{ resize: 'none' }} 
             />
+
             {/* Edit, Save Button */}
             <button
-                className="inline-flex w-8 h-8 rounded-lg text-sm border border-black/10 justify-center items-center bg-gray-50 hover:bg-gray-100 shrink-0 disabled:opacity-50"
+                className="inline-flex w-8 h-8 rounded-lg text-sm border
+                 border-black/10 justify-center items-center bg-gray-50
+                  hover:bg-gray-100 shrink-0 disabled:opacity-50"
                 onClick={() => {
                     if (todo.completed) return;
 
